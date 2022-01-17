@@ -25,7 +25,7 @@ func (mr *malformedRequest) Error() string {
 }
 
 func decodeJSONBody(w http.ResponseWriter, r *http.Request, dst interface{}) error {
-	if r.Method == "GET" {
+	if r.Method != "POST" {
 		msg := "Method is not supported."
 		return &malformedRequest{status: http.StatusNotFound, msg: msg}
 	}

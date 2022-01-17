@@ -16,5 +16,8 @@ Example of request will be validated in app
     "email": *Valid email*
 }
 ```
-
-In case of deploy check ```.env``` file to indetify which vars shold be set.
+Request should contain headers:
+```
+"Content-Type": "application/json"
+```
+In case of deploy check ```.env``` file to identify which vars should be set.
