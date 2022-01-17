@@ -68,7 +68,7 @@ func getTicketHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_, found := users[u.Email]
-	msg, ok, httpStatus := getTicket(u.Email, ticketsLeft, found)
+	msg, ok, httpStatus := getTicket(u.Email, found)
 	if !ok {
 		http.Error(w, msg, httpStatus)
 		return
@@ -84,7 +84,7 @@ func getTicketHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getTicket(email string, ticketsLeft int, found bool) (msg string, ok bool, httpStatus int) {
+func getTicket(email string, found bool) (msg string, ok bool, httpStatus int) {
 	//Check if email valid
 	if !valid(email) {
 		return "Email is not valid", false, http.StatusBadRequest
