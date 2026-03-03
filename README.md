@@ -1,23 +1,61 @@
 # lotteryApp
 
-to start app run command
-```
+A simple HTTP service that distributes lottery tickets by email.
+
+## Setup & Run
+
+```bash
+go mod download
 go run .
 ```
 
-Simple web service that receives email to identify user and gives response:
-- with HTTP 200 if the request is successful;
-- with HTTP 410 if out of tickets;
-- with HTTP 403 if users try to issue a ticket again.
+The server starts on port `8080` by default.
 
-Example of request will be validated in app
+## Configuration
+
+Set the following variables in `.env` before running:
+
+| Variable         | Description                        | Example |
+|------------------|------------------------------------|---------|
+| `num_of_tickets` | Number of tickets available        | `2`     |
+| `PORT`           | Port to listen on (default: 8080)  | `8080`  |
+
+## API
+
+### `POST /ticket`
+
+Issues a lottery ticket to the given email address.
+
+**Headers:**
 ```
+Content-Type: application/json
+```
+
+**Request body:**
+```json
 {
-    "email": *Valid email*
+    "email": "user@example.com"
 }
 ```
-Request should contain headers:
+
+**Responses:**
+
+| Status | Meaning                          |
+|--------|----------------------------------|
+| `200`  | Ticket issued successfully       |
+| `400`  | Invalid or malformed request     |
+| `403`  | Email already has a ticket       |
+| `410`  | No tickets left                  |
+
+**Example request:**
+```bash
+curl -X POST http://localhost:8080/ticket \
+  -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com"}'
 ```
-"Content-Type": "application/json"
+
+## Testing
+
+```bash
+go test ./...
 ```
-In case of deploy check ```.env``` file to identify which vars should be set.
