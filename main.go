@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"sync"
 )
 
 func main() {
@@ -47,6 +48,7 @@ type User struct {
 //Global variables to simplify the solution for the demonstration purpose
 //in real project should be realised in storage
 var (
+	mu          sync.Mutex
 	users       = make(map[string]int)
 	ticketsLeft int
 )
@@ -67,8 +69,15 @@ func getTicketHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	mu.Lock()
 	_, found := users[u.Email]
-	msg, ok, httpStatus := getTicket(u.Email, found)
+	msg, ok, httpStatus := getTicket(u.Email, ticketsLeft, found)
+	if ok {
+		users[u.Email] = ticketsLeft
+		ticketsLeft--
+	}
+	mu.Unlock()
+
 	if !ok {
 		http.Error(w, msg, httpStatus)
 		return
@@ -84,7 +93,7 @@ func getTicketHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getTicket(email string, found bool) (msg string, ok bool, httpStatus int) {
+func getTicket(email string, ticketsAmount int, found bool) (msg string, ok bool, httpStatus int) {
 	//Check if email valid
 	if !valid(email) {
 		return "Email is not valid", false, http.StatusBadRequest
@@ -95,15 +104,9 @@ func getTicket(email string, found bool) (msg string, ok bool, httpStatus int) {
 		return "You've got ticket already", false, http.StatusForbidden
 	}
 
-	if ticketsLeft < 1 {
+	if ticketsAmount < 1 {
 		return "Sorry, but we are out of tickets", false, http.StatusGone
 	}
-
-	// Add user as get ticket
-	users[email] = ticketsLeft
-
-	// Decrement ticket amount
-	ticketsLeft--
 
 	return "", true, http.StatusOK
 }
